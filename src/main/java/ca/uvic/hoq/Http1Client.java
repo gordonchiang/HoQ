@@ -16,7 +16,7 @@ import ca.uhn.hl7v2.hoh.api.IReceivable;
 import ca.uhn.hl7v2.hoh.hapi.api.MessageSendable;
 import ca.uhn.hl7v2.hoh.api.MessageMetadataKeys;
 
-public class App {
+public class Http1Client {
 
 	private static final String HOST = "localhost";
 	private static final String URI = "/";
