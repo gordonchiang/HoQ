@@ -7,8 +7,7 @@ import ca.uhn.hl7v2.llp.LowerLayerProtocol;
 import ca.uhn.hl7v2.hoh.llp.Hl7OverHttpLowerLayerProtocol;
 import ca.uhn.hl7v2.hoh.util.ServerRoleEnum;
 import ca.uhn.hl7v2.app.SimpleServer;
-import ca.uhn.hl7v2.app.DefaultApplication;
-import ca.uhn.hl7v2.protocol.ReceivingApplication;
+import ca.uvic.hoq.MyApplication;
 
 public class Http1Server {
 
@@ -42,7 +41,7 @@ public class Http1Server {
 
 		// Register an application to the server, and start it
 		// You are now ready to receive HL7 messages!
-		server.registerApplication("*", "*", (ReceivingApplication)new DefaultApplication());
+		server.registerApplication("*", "*", new MyApplication());
 		server.start();
 	}
 
