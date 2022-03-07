@@ -1,4 +1,4 @@
-package hoq;
+package ca.uvic.hoq;
 
 public class App {
 

@@ -33,7 +33,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>hoq.App</mainClass>
+							<mainClass>ca.uvic.hoq.App</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
@@ -57,5 +57,10 @@
         <classifier>${os.detected.classifier}</classifier>
         <version>0.2.5</version>
     </dependency>
+    <dependency>
+	  <groupId>ca.uhn.hapi</groupId>
+	  <artifactId>hapi-base</artifactId>
+	  <version>2.3</version>
+	</dependency> 
   </dependencies>
 </project>
