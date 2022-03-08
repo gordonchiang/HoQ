@@ -28,6 +28,14 @@ import io.quiche4j.PacketType;
 import io.quiche4j.Quiche;
 import io.quiche4j.Utils;
 
+import ca.uhn.hl7v2.DefaultHapiContext;
+import ca.uhn.hl7v2.HL7Exception;
+import ca.uhn.hl7v2.HapiContext;
+import ca.uhn.hl7v2.model.Message;
+import ca.uhn.hl7v2.parser.Parser;
+import ca.uhn.hl7v2.protocol.ReceivingApplication;
+import ca.uvic.hoq.MyApplication;
+
 public class Http3Server {
 
     protected final static class PartialResponse {
@@ -82,6 +90,9 @@ public class Http3Server {
     private static final String HEADER_NAME_STATUS = ":status";
     private static final String HEADER_NAME_SERVER = "server";
     private static final String HEADER_NAME_CONTENT_LENGTH = "content-length";
+    
+    private static HapiContext context = new DefaultHapiContext();
+    private static final ReceivingApplication myApplication = new MyApplication();
 
     public static void main(String[] args) throws IOException {
         String hostname = "localhost";
@@ -283,7 +294,8 @@ public class Http3Server {
                                 } else {
                                     System.out.println("< got body " + bodyLength + " bytes for " + streamId);
                                     final byte[] body = Arrays.copyOfRange(buf, 0, bodyLength);
-                                    System.out.println(new String(body, StandardCharsets.UTF_8));
+                                    final String encodedMessage = new String(body, StandardCharsets.UTF_8);
+                                    handleHL7Message(encodedMessage);
                                 }
 
                                 handleData(current, streamId);
@@ -422,6 +434,19 @@ public class Http3Server {
             final PartialResponse part = new PartialResponse(null, body, written);
             client.partialResponses.put(streamId, part);
         }
+    }
+    
+    public final static void handleHL7Message(String encodedMessage) {
+    	try {
+	    	Parser parser = context.getPipeParser();
+	    	Message message = parser.parse(encodedMessage);
+	        if (myApplication.canProcess(message)) { // always true
+	        	myApplication.processMessage(message, null);
+	        }
+    	} catch (Exception e) {
+    		System.out.println("Error handling HL7 message: " + e);
+    		System.exit(1);
+    	}
     }
 
     public final static void handleWritable(Client client, long streamId) {
