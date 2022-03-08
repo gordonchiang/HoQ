@@ -136,7 +136,7 @@ public class Http3Server {
         final HashMap<String, Client> clients = new HashMap<>();
         final AtomicBoolean running = new AtomicBoolean(true);
 
-        System.out.println(String.format("! listening on %s:%d", hostname, port));
+//        System.out.println(String.format("! listening on %s:%d", hostname, port));
 
         while (running.get()) {
             // READING
@@ -157,13 +157,13 @@ public class Http3Server {
                 // xxx(okachaiev): can we avoid doing copy here?
                 final byte[] packetBuf = Arrays.copyOfRange(packet.getData(), offset, len);
 
-                System.out.println("> socket.recv " + len + " bytes");
+//                System.out.println("> socket.recv " + len + " bytes");
 
                 // PARSE QUIC HEADER
                 final PacketHeader hdr;
                 try {
                     hdr = PacketHeader.parse(packetBuf, Quiche.MAX_CONN_ID_LEN);
-                    System.out.println("> packet " + hdr);
+//                    System.out.println("> packet " + hdr);
                 } catch (Exception e) {
                     System.out.println("! failed to parse headers " + e);
                     continue;
@@ -183,7 +183,7 @@ public class Http3Server {
 
                     // NEGOTIATE VERSION
                     if (!Quiche.versionIsSupported(hdr.version())) {
-                        System.out.println("> version negotiation");
+//                        System.out.println("> version negotiation");
 
                         final int negLength = Quiche.negotiateVersion(hdr.sourceConnectionId(),
                                 hdr.destinationConnectionId(), out);
@@ -200,7 +200,7 @@ public class Http3Server {
 
                     // RETRY IF TOKEN IS EMPTY
                     if (null == hdr.token()) {
-                        System.out.println("> stateless retry");
+//                        System.out.println("> stateless retry");
 
                         final byte[] token = mintToken(hdr, packet.getAddress());
                         final int retryLength = Quiche.retry(hdr.sourceConnectionId(), hdr.destinationConnectionId(),
@@ -211,7 +211,7 @@ public class Http3Server {
                             return;
                         }
 
-                        System.out.println("> retry length " + retryLength);
+//                        System.out.println("> retry length " + retryLength);
 
                         final DatagramPacket retryPacket = new DatagramPacket(out, retryLength, packet.getAddress(),
                                 packet.getPort());
@@ -236,12 +236,12 @@ public class Http3Server {
 
                     final Connection conn = Quiche.accept(sourceConnId, odcid, config);
 
-                    System.out.println("> new connection " + Utils.asHex(sourceConnId));
+//                    System.out.println("> new connection " + Utils.asHex(sourceConnId));
 
                     client = new Client(conn, packet.getSocketAddress());
                     clients.put(Utils.asHex(sourceConnId), client);
 
-                    System.out.println("! # of clients: " + clients.size());
+//                    System.out.println("! # of clients: " + clients.size());
                 }
 
                 // POTENTIALLY COALESCED PACKETS
@@ -254,17 +254,17 @@ public class Http3Server {
                 if (read <= 0)
                     break;
 
-                System.out.println("> conn.recv " + read + " bytes");
-                System.out.println("> conn.established " + conn.isEstablished());
+//                System.out.println("> conn.recv " + read + " bytes");
+//                System.out.println("> conn.established " + conn.isEstablished());
 
                 // ESTABLISH H3 CONNECTION IF NONE
                 Http3Connection h3Conn = client.http3Connection();
                 if ((conn.isInEarlyData() || conn.isEstablished()) && null == h3Conn) {
-                    System.out.println("> handshake done " + conn.isEstablished());
+//                    System.out.println("> handshake done " + conn.isEstablished());
                     h3Conn = Http3Connection.withTransport(conn, h3Config);
                     client.setHttp3Connection(h3Conn);
 
-                    System.out.println("> new H3 connection " + h3Conn);
+//                    System.out.println("> new H3 connection " + h3Conn);
                 }
 
                 if (null != h3Conn) {
@@ -280,20 +280,20 @@ public class Http3Server {
                         final long streamId = h3c.poll(new Http3EventListener() {
                             public void onHeaders(long streamId, List<Http3Header> headers, boolean hasBody) {
                                 headers.forEach(header -> {
-                                    System.out.println("< got header " + header.name() + " on " + streamId);
+//                                    System.out.println("< got header " + header.name() + " on " + streamId);
                                 });
                                 
                             }
 
                             public void onData(long streamId) {
-                                System.out.println("< got data on " + streamId);
+//                                System.out.println("< got data on " + streamId);
 
                                 final int bodyLength = h3c.recvBody(streamId, buf);
                                 String res = null;
                                 if (bodyLength < 0 && bodyLength != Quiche.ErrorCode.DONE) {
                                     System.out.println("! recv body failed " + bodyLength);
                                 } else {
-                                    System.out.println("< got body " + bodyLength + " bytes for " + streamId);
+//                                    System.out.println("< got body " + bodyLength + " bytes for " + streamId);
                                     final byte[] body = Arrays.copyOfRange(buf, 0, bodyLength);
                                     final String encodedMessage = new String(body, StandardCharsets.UTF_8);
                                     res = handleHL7Message(encodedMessage);
@@ -303,7 +303,7 @@ public class Http3Server {
                             }
 
                             public void onFinished(long streamId) {
-                                System.out.println("< finished " + streamId);
+//                                System.out.println("< finished " + streamId);
                             }
                         });
 
@@ -317,7 +317,7 @@ public class Http3Server {
                         if (Quiche.ErrorCode.DONE == streamId)
                             break;
 
-                        System.out.println("< poll " + streamId);
+//                        System.out.println("< poll " + streamId);
                     }
                 }
             }
@@ -335,7 +335,7 @@ public class Http3Server {
                     }
                     if (len <= 0)
                         break;
-                    System.out.println("> conn.send " + len + " bytes");
+//                    System.out.println("> conn.send " + len + " bytes");
                     final DatagramPacket packet = new DatagramPacket(out, len, client.sender());
                     socket.send(packet);
                 }
@@ -344,18 +344,18 @@ public class Http3Server {
             // CLEANUP CLOSED CONNS
             for (String connId : clients.keySet()) {
                 if (clients.get(connId).connection().isClosed()) {
-                    System.out.println("> cleaning up " + connId);
+//                    System.out.println("> cleaning up " + connId);
 
                     clients.remove(connId);
 
-                    System.out.println("! # of clients: " + clients.size());
+//                    System.out.println("! # of clients: " + clients.size());
                 }
             }
 
             // BACK TO READING
         }
 
-        System.out.println("> server stopped");
+//        System.out.println("> server stopped");
         socket.close();
     }
 
@@ -392,7 +392,7 @@ public class Http3Server {
     }
 
     public final static void handleData(Client client, Long streamId, String res) {
-        System.out.println("< request " + streamId);
+//        System.out.println("< request " + streamId);
 
         final Connection conn = client.connection();
         final Http3Connection h3Conn = client.http3Connection();
@@ -428,7 +428,7 @@ public class Http3Server {
             return;
         }
 
-        System.out.println("> send body " + written + " body");
+//        System.out.println("> send body " + written + " body");
 
         if (written < body.length) {
             // STASH PARTIAL RESPONSE
@@ -478,7 +478,7 @@ public class Http3Server {
             return;
         }
 
-        System.out.println("> send body " + written + " body");
+//        System.out.println("> send body " + written + " body");
 
         resp.written += written;
         if (resp.written < resp.body.length) {
