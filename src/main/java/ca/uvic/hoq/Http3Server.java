@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -264,16 +265,28 @@ public class Http3Server {
 
                     // H3 POLL
                     while (true) {
-                        final long streamId = h3Conn.poll(new Http3EventListener() {
+                    	final Http3Connection h3c = h3Conn;
+                        final long streamId = h3c.poll(new Http3EventListener() {
                             public void onHeaders(long streamId, List<Http3Header> headers, boolean hasBody) {
                                 headers.forEach(header -> {
                                     System.out.println("< got header " + header.name() + " on " + streamId);
                                 });
-                                handleRequest(current, streamId, headers);
+                                
                             }
 
                             public void onData(long streamId) {
                                 System.out.println("< got data on " + streamId);
+
+                                final int bodyLength = h3c.recvBody(streamId, buf);
+                                if (bodyLength < 0 && bodyLength != Quiche.ErrorCode.DONE) {
+                                    System.out.println("! recv body failed " + bodyLength);
+                                } else {
+                                    System.out.println("< got body " + bodyLength + " bytes for " + streamId);
+                                    final byte[] body = Arrays.copyOfRange(buf, 0, bodyLength);
+                                    System.out.println(new String(body, StandardCharsets.UTF_8));
+                                }
+
+                                handleData(current, streamId);
                             }
 
                             public void onFinished(long streamId) {
@@ -365,7 +378,7 @@ public class Http3Server {
         return Arrays.copyOfRange(token, SERVER_NAME_BYTES_LEN + addr.length, token.length);
     }
 
-    public final static void handleRequest(Client client, Long streamId, List<Http3Header> req) {
+    public final static void handleData(Client client, Long streamId) {
         System.out.println("< request " + streamId);
 
         final Connection conn = client.connection();
@@ -374,7 +387,7 @@ public class Http3Server {
         // SHUTDOWN STREAM
         conn.streamShutdown(streamId, Quiche.Shutdown.READ, 0L);
 
-        final byte[] body = "Hello world".getBytes();
+        final byte[] body = "Hello client, I'm server!".getBytes();
         final List<Http3Header> headers = new ArrayList<>();
         headers.add(new Http3Header(HEADER_NAME_STATUS, "200"));
         headers.add(new Http3Header(HEADER_NAME_SERVER, SERVER_NAME));

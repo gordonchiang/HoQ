@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import ca.uvic.hoq.Http3Server.PartialResponse;
 import io.quiche4j.Config;
 import io.quiche4j.ConfigBuilder;
 import io.quiche4j.Connection;
@@ -170,14 +171,22 @@ public class Http3Client {
 
                 System.out.println("! h3 conn is established");
 
+                final byte[] body = "Hello server, I'm client!".getBytes();
+
                 List<Http3Header> req = new ArrayList<>();
                 req.add(new Http3Header(":method", "GET"));
                 req.add(new Http3Header(":scheme", uri.getScheme()));
                 req.add(new Http3Header(":authority", uri.getAuthority()));
                 req.add(new Http3Header(":path", uri.getPath()));
                 req.add(new Http3Header("user-agent", CLIENT_NAME));
-                req.add(new Http3Header("content-length", "0"));
-                h3Conn.sendRequest(req, true);
+                req.add(new Http3Header("content-length", Integer.toString(body.length)));
+
+                streamId = h3Conn.sendRequest(req, false);
+                final long written = h3Conn.sendBody(streamId, body, true);
+                if (written < 0) {
+                    System.out.println("! h3 send body failed " + written);
+                    return;
+                }
             }
 
             // WRITING LOOP
