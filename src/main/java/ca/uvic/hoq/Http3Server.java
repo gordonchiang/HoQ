@@ -289,16 +289,17 @@ public class Http3Server {
                                 System.out.println("< got data on " + streamId);
 
                                 final int bodyLength = h3c.recvBody(streamId, buf);
+                                String res = null;
                                 if (bodyLength < 0 && bodyLength != Quiche.ErrorCode.DONE) {
                                     System.out.println("! recv body failed " + bodyLength);
                                 } else {
                                     System.out.println("< got body " + bodyLength + " bytes for " + streamId);
                                     final byte[] body = Arrays.copyOfRange(buf, 0, bodyLength);
                                     final String encodedMessage = new String(body, StandardCharsets.UTF_8);
-                                    handleHL7Message(encodedMessage);
+                                    res = handleHL7Message(encodedMessage);
                                 }
 
-                                handleData(current, streamId);
+                                handleData(current, streamId, res);
                             }
 
                             public void onFinished(long streamId) {
@@ -390,7 +391,7 @@ public class Http3Server {
         return Arrays.copyOfRange(token, SERVER_NAME_BYTES_LEN + addr.length, token.length);
     }
 
-    public final static void handleData(Client client, Long streamId) {
+    public final static void handleData(Client client, Long streamId, String res) {
         System.out.println("< request " + streamId);
 
         final Connection conn = client.connection();
@@ -399,7 +400,7 @@ public class Http3Server {
         // SHUTDOWN STREAM
         conn.streamShutdown(streamId, Quiche.Shutdown.READ, 0L);
 
-        final byte[] body = "Hello client, I'm server!".getBytes();
+        final byte[] body = res.getBytes();
         final List<Http3Header> headers = new ArrayList<>();
         headers.add(new Http3Header(HEADER_NAME_STATUS, "200"));
         headers.add(new Http3Header(HEADER_NAME_SERVER, SERVER_NAME));
@@ -436,17 +437,20 @@ public class Http3Server {
         }
     }
     
-    public final static void handleHL7Message(String encodedMessage) {
+    public final static String handleHL7Message(String encodedMessage) {
+    	String response = null;
     	try {
 	    	Parser parser = context.getPipeParser();
 	    	Message message = parser.parse(encodedMessage);
 	        if (myApplication.canProcess(message)) { // always true
-	        	myApplication.processMessage(message, null);
+	        	Message res = myApplication.processMessage(message, null);
+	        	response = parser.encode(res);
 	        }
     	} catch (Exception e) {
     		System.out.println("Error handling HL7 message: " + e);
     		System.exit(1);
     	}
+    	return response;
     }
 
     public final static void handleWritable(Client client, long streamId) {
