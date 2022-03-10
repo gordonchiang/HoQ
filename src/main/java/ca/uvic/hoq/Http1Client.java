@@ -15,6 +15,8 @@ import ca.uhn.hl7v2.hoh.api.IReceivable;
 import ca.uhn.hl7v2.hoh.hapi.api.MessageSendable;
 import ca.uhn.hl7v2.hoh.api.MessageMetadataKeys;
 
+import io.quiche4j.Utils;
+
 public class Http1Client {
 
 	private static final String HOST = "localhost";
@@ -65,7 +67,7 @@ public class Http1Client {
 		if (enableTLS) {
 			// Assign a socket factory which references the keystore
 			CustomCertificateTlsSocketFactory clientSocketFactory = new CustomCertificateTlsSocketFactory();
-			clientSocketFactory.setKeystoreFilename("/home/gordon/CSC497/HoQ/src/main/resources/privatekeystore.jks");
+			clientSocketFactory.setKeystoreFilename(Utils.copyFileFromJAR("keystore", "/keystore.pkcs12"));
 			clientSocketFactory.setKeystorePassphrase("hoqpassword");
 			client.setSocketFactory(clientSocketFactory);
 		}

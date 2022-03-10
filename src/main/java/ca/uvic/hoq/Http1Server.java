@@ -12,6 +12,8 @@ import ca.uhn.hl7v2.app.SimpleServer;
 import ca.uhn.hl7v2.app.HL7Service;
 import ca.uvic.hoq.MyApplication;
 
+import io.quiche4j.Utils;
+
 public class Http1Server {
 
 	private static final String HOST = "localhost";
@@ -28,7 +30,7 @@ public class Http1Server {
 		if (enableTLS) {
 			// Create a socket factory which references the keystore
 			CustomCertificateTlsSocketFactory serverSocketFactory = new CustomCertificateTlsSocketFactory();
-			serverSocketFactory.setKeystoreFilename("/home/gordon/CSC497/HoQ/src/main/resources/privatekeystore.jks");
+			serverSocketFactory.setKeystoreFilename(Utils.copyFileFromJAR("keystore", "/keystore.pkcs12"));
 			serverSocketFactory.setKeystorePassphrase("hoqpassword");
 
 			// The socket factory needs to be wrapped for use in HAPI
