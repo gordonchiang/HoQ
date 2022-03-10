@@ -19,7 +19,7 @@ public class Http1Server {
 
 	public static void main(String[] args) throws Exception {
 		
-		System.out.println("Hello world!");
+		final boolean enableTLS = args.length > 0 && args[0].equals("--tls") ? true : false;
 		
 		/*
 		 * Sending a message with HAPI and HL7 over HTTP. First
