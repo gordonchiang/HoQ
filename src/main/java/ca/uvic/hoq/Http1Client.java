@@ -9,6 +9,7 @@ import ca.uhn.hl7v2.model.v24.segment.MSH;
 import ca.uhn.hl7v2.model.v24.segment.PID;
 import ca.uhn.hl7v2.parser.Parser;
 import ca.uhn.hl7v2.hoh.hapi.client.HohClientSimple;
+import ca.uhn.hl7v2.hoh.sockets.CustomCertificateTlsSocketFactory;
 import ca.uhn.hl7v2.hoh.api.ISendable;
 import ca.uhn.hl7v2.hoh.api.IReceivable;
 import ca.uhn.hl7v2.hoh.hapi.api.MessageSendable;
@@ -58,12 +59,20 @@ public class Http1Client {
 		 * MSH|^~\&|TestSendingSystem||||200701011539||ADT^A01^ADT A01||||123
 		 * PID|||123456||Doe^John
 		 */
-		
+
 		HohClientSimple client = new HohClientSimple(HOST, PORT_NUMBER, URI, parser);
-		
-		// The MessageSendable provides the message to send 
+
+		if (enableTLS) {
+			// Assign a socket factory which references the keystore
+			CustomCertificateTlsSocketFactory clientSocketFactory = new CustomCertificateTlsSocketFactory();
+			clientSocketFactory.setKeystoreFilename("/home/gordon/CSC497/HoQ/src/main/resources/privatekeystore.jks");
+			clientSocketFactory.setKeystorePassphrase("hoqpassword");
+			client.setSocketFactory(clientSocketFactory);
+		}
+
+		// The MessageSendable provides the message to send
 		ISendable sendable = new MessageSendable(adt);
-		
+
 		// sendAndReceive actually sends the message
 		IReceivable<Message> receivable = client.sendAndReceiveMessage(sendable);
 
