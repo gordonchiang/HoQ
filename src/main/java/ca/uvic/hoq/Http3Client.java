@@ -149,6 +149,10 @@ public class Http3Client {
 //                                System.out.println("< got body " + bodyLength + " bytes for " + streamId);
                                 final byte[] body = Arrays.copyOfRange(buffer, 0, bodyLength);
                                 System.out.println(new String(body, StandardCharsets.UTF_8));
+                                
+                                // Close connection immediately after receiving ACK to HL7 message
+                                conn.close(true, 0x00, "kthxbye");
+                                reading.set(false);
                             }
                         }
 
