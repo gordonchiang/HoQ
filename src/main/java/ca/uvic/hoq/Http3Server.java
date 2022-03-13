@@ -125,7 +125,7 @@ public class Http3Server {
             .withInitialMaxStreamDataUni(1_000_000)
             .withInitialMaxStreamsBidi(100)
             .withInitialMaxStreamsUni(100)
-            .withDisableActiveMigration(true)
+            .withDisableActiveMigration(false)
             .enableEarlyData()
             .build();
 

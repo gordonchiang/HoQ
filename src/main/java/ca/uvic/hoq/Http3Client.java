@@ -41,7 +41,7 @@ import ca.uhn.hl7v2.parser.Parser;
 
 public class Http3Client {
 
-    public static final int MAX_DATAGRAM_SIZE = 2700;
+    public static final int MAX_DATAGRAM_SIZE = 2048;
 
     public static final String CLIENT_NAME = "Quiche4j";
 
@@ -66,7 +66,6 @@ public class Http3Client {
 
         final Config config = new ConfigBuilder(Quiche.PROTOCOL_VERSION)
             .withApplicationProtos(Http3.APPLICATION_PROTOCOL)
-            // CAUTION: this should not be set to `false` in production
             .withVerifyPeer(false)
             .loadCertChainFromPemFile(Utils.copyFileFromJAR("certs", "/cert.crt"))
             .loadPrivKeyFromPemFile(Utils.copyFileFromJAR("certs", "/cert.key"))
@@ -78,7 +77,7 @@ public class Http3Client {
             .withInitialMaxStreamDataUni(1_000_000)
             .withInitialMaxStreamsBidi(100)
             .withInitialMaxStreamsUni(100)
-            .withDisableActiveMigration(true)
+            .withDisableActiveMigration(false)
             .build();
 
         final byte[] connId = Quiche.newConnectionId();

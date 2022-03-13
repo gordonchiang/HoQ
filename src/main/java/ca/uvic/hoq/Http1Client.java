@@ -1,5 +1,9 @@
 package ca.uvic.hoq;
 
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import ca.uhn.hl7v2.DefaultHapiContext;
 import ca.uhn.hl7v2.HapiContext;
 import ca.uhn.hl7v2.HL7Exception;
@@ -19,16 +23,32 @@ import io.quiche4j.Utils;
 
 public class Http1Client {
 
-	private static final String HOST = "localhost";
-	private static final String URI = "/";
-	private static final int PORT_NUMBER = 8888;
-
 	private static HapiContext context = new DefaultHapiContext();
 
 	public static void main(String[] args) throws Exception {
+		// Parse arguments
+        if (2 != args.length) {
+            System.out.println("Usage: ./http1.sh -c -t -u https://localhost:8888");
+            System.exit(1);
+        }
+        
+        final String url = args[0];
+        final URI uri;
+        final int port;
+        final String host;
+        try {
+            uri = new URI(url);
+            port = uri.getPort();
+            host = uri.getHost();
+        } catch (URISyntaxException e) {
+            System.out.println("Failed to parse URL " + url);
+            System.exit(1);
+            return;
+        }
 
-		final boolean enableTLS = args.length > 0 && args[0].equals("--tls") ? true : false;
+		final boolean enableTLS = args[1].equals("true") ? true : false;
 
+		// Create HL7 message
 		ADT_A01 adt = new ADT_A01();
 		adt.initQuickstart("ADT", "A01", "P");
 
@@ -48,21 +68,13 @@ public class Http1Client {
 		 * populated
 		 */
 
-		// Now, let's encode the message and look at the output
+		// Encode the message
 		HapiContext context = new DefaultHapiContext();
 		Parser parser = context.getPipeParser();
 		String encodedMessage = parser.encode(adt);
-		System.out.println("Printing ER7 Encoded Message:");
-		System.out.println(encodedMessage);
+		System.out.println("HL7 message: " + encodedMessage);
 
-		/*
-		 * Prints:
-		 * 
-		 * MSH|^~\&|TestSendingSystem||||200701011539||ADT^A01^ADT A01||||123
-		 * PID|||123456||Doe^John
-		 */
-
-		HohClientSimple client = new HohClientSimple(HOST, PORT_NUMBER, URI, parser);
+		HohClientSimple client = new HohClientSimple(host, port, "/", parser);
 
 		if (enableTLS) {
 			// Assign a socket factory which references the keystore
@@ -78,13 +90,9 @@ public class Http1Client {
 		// sendAndReceive actually sends the message
 		IReceivable<Message> receivable = client.sendAndReceiveMessage(sendable);
 
-		// receivavle.getRawMessage() provides the response
+		// receivable.getRawMessage() provides the response
 		Message message = receivable.getMessage();
-		System.out.println("Response was:\n" + message.encode());
-
-		// IReceivable also stores metadata about the message
-		String remoteHostIp = (String) receivable.getMetadata().get(MessageMetadataKeys.REMOTE_HOST_ADDRESS);
-		System.out.println("From:\n" + remoteHostIp);
+		System.out.println("Response: " + message.encode());
 	}
 
 }

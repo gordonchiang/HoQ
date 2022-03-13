@@ -16,15 +16,25 @@ import io.quiche4j.Utils;
 
 public class Http1Server {
 
-	private static final String HOST = "localhost";
-	private static final String URI = "/";
-	private static final int PORT_NUMBER = 8888;
-
 	private static HapiContext context = new DefaultHapiContext();
 
 	public static void main(String[] args) throws Exception {
+		// Parse arguments
+        if (2 != args.length) {
+            System.out.println("Usage: ./http1.sh -s -t -u 8888");
+            System.exit(1);
+        }
+        
+        final String url = args[0];
+        final int port;
+        if (args[0].contains(":")) {
+        	final String[] parts = args[0].split(":", 2);
+            port = Integer.parseInt(parts[1]);
+        } else {
+        	port = Integer.parseInt(args[0]);
+        }
 
-		final boolean enableTLS = args.length > 0 && args[0].equals("--tls") ? true : false;
+        final boolean enableTLS = args[1].equals("true") ? true : false;
 
 		HapiSocketTlsFactoryWrapper hapiSocketFactory = null;
 		if (enableTLS) {
@@ -38,18 +48,14 @@ public class Http1Server {
 			context.setSocketFactory(hapiSocketFactory);
 		}
 
-		/*
-		 * Sending a message with HAPI and HL7 over HTTP. First an LLP instance is
-		 * created. Note that you must tell the LLP class whether it will be used in a
-		 * client or a server.
-		 */
+		// Create an LLP instance
 		LowerLayerProtocol llp = new Hl7OverHttpLowerLayerProtocol(ServerRoleEnum.SERVER);
 
 		// Create the server
 		PipeParser parser = PipeParser.getInstanceWithNoValidation();
 		context.setLowerLayerProtocol(llp);
-		HL7Service server = enableTLS ? context.newServer(PORT_NUMBER, enableTLS) // Start a server listening at port with a pipe parser
-				: new SimpleServer(PORT_NUMBER, llp, parser); // Start a server with the llp and parser
+		HL7Service server = enableTLS ? context.newServer(port, enableTLS) // Start a server listening at port with a pipe parser
+				: new SimpleServer(port, llp, parser); // Start a server with the llp and parser
 		;
 
 		// Register an application to the server and start it
