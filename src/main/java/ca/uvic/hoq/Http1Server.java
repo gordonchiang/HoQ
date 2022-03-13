@@ -1,5 +1,9 @@
 package ca.uvic.hoq;
 
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import ca.uhn.hl7v2.DefaultHapiContext;
 import ca.uhn.hl7v2.HapiContext;
 import ca.uhn.hl7v2.hoh.sockets.CustomCertificateTlsSocketFactory;
@@ -24,14 +28,23 @@ public class Http1Server {
       System.out.println("Usage: ./http1.sh -s -t -u 8888");
       System.exit(1);
     }
-
+    
     final String url = args[0];
+    final URI uri;
     final int port;
-    if (args[0].contains(":")) {
-      final String[] parts = args[0].split(":", 2);
-      port = Integer.parseInt(parts[1]);
-    } else {
+    final InetAddress address;
+    final String host;
+    if (!url.contains(":")) {
       port = Integer.parseInt(args[0]);
+    } else {
+      try {
+        uri = new URI(url);
+        port = uri.getPort();
+      } catch (URISyntaxException e) {
+        System.out.println("Failed to parse URL " + url);
+        System.exit(1);
+        return;
+      }
     }
 
     final boolean enableTLS = args[1].equals("true") ? true : false;
