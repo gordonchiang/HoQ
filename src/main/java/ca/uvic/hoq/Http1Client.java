@@ -27,24 +27,24 @@ public class Http1Client {
 
 	public static void main(String[] args) throws Exception {
 		// Parse arguments
-        if (2 != args.length) {
-            System.out.println("Usage: ./http1.sh -c -t -u https://localhost:8888");
-            System.exit(1);
-        }
-        
-        final String url = args[0];
-        final URI uri;
-        final int port;
-        final String host;
-        try {
-            uri = new URI(url);
-            port = uri.getPort();
-            host = uri.getHost();
-        } catch (URISyntaxException e) {
-            System.out.println("Failed to parse URL " + url);
-            System.exit(1);
-            return;
-        }
+		if (2 != args.length) {
+			System.out.println("Usage: ./http1.sh -c -t -u https://localhost:8888");
+			System.exit(1);
+		}
+
+		final String url = args[0];
+		final URI uri;
+		final int port;
+		final String host;
+		try {
+			uri = new URI(url);
+			port = uri.getPort();
+			host = uri.getHost();
+		} catch (URISyntaxException e) {
+			System.out.println("Failed to parse URL " + url);
+			System.exit(1);
+			return;
+		}
 
 		final boolean enableTLS = args[1].equals("true") ? true : false;
 
