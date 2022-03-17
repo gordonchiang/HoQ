@@ -46,6 +46,7 @@ public class Http3Client {
   public static final int MAX_DATAGRAM_SIZE = 2048;
 
   public static final String CLIENT_NAME = "Quiche4j";
+  public static final String CONTENT_TYPE = "application/hl7-v2; charset=UTF-8";
 
   public static void main(String[] args) throws UnknownHostException, IOException {
     // Parse arguments
@@ -99,17 +100,17 @@ public class Http3Client {
       System.exit(1);
       return;
     }
-
-    final DatagramPacket handshakePacket = new DatagramPacket(buffer, len, address, port);
-    final DatagramSocket socket = new DatagramSocket(0);
-    socket.setSoTimeout(1);
-    socket.send(handshakePacket);
-
+    
     Long streamId = null;
     final AtomicBoolean reading = new AtomicBoolean(true);
     final Http3Config h3Config = new Http3ConfigBuilder().build();
     DatagramPacket packet;
     Http3Connection h3Conn = null;
+
+    final DatagramPacket handshakePacket = new DatagramPacket(buffer, len, address, port);
+    final DatagramSocket socket = new DatagramSocket(0);
+    socket.setSoTimeout(1);
+    socket.send(handshakePacket);
 
     while (!conn.isClosed()) {
       // READING LOOP
@@ -133,8 +134,7 @@ public class Http3Client {
         if (null != h3Conn) {
           final Http3Connection h3c = h3Conn;
           streamId = h3c.poll(new Http3EventListener() {
-            public void onHeaders(long streamId, List<Http3Header> headers, boolean hasBody) {
-            }
+            public void onHeaders(long streamId, List<Http3Header> headers, boolean hasBody) {}
 
             public void onData(long streamId) {
               final int bodyLength = h3c.recvBody(streamId, buffer);
@@ -150,10 +150,7 @@ public class Http3Client {
               }
             }
 
-            public void onFinished(long streamId) {
-              conn.close(true, 0x00, "kthxbye");
-              reading.set(false);
-            }
+            public void onFinished(long streamId) {}
           });
 
           if (streamId < 0 && streamId != Quiche.ErrorCode.DONE) {
@@ -177,11 +174,12 @@ public class Http3Client {
         h3Conn = Http3Connection.withTransport(conn, h3Config);
 
         List<Http3Header> req = new ArrayList<>();
-        req.add(new Http3Header(":method", "GET"));
+        req.add(new Http3Header(":method", "POST"));
         req.add(new Http3Header(":scheme", uri.getScheme()));
         req.add(new Http3Header(":authority", uri.getAuthority()));
         req.add(new Http3Header(":path", uri.getPath()));
         req.add(new Http3Header("user-agent", CLIENT_NAME));
+        req.add(new Http3Header("content-type", CONTENT_TYPE));
         req.add(new Http3Header("content-length", Integer.toString(hl7_body.length)));
 
         streamId = h3Conn.sendRequest(req, false);

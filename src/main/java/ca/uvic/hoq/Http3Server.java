@@ -267,8 +267,7 @@ public class Http3Server {
           while (true) {
             final Http3Connection h3c = h3Conn;
             final long streamId = h3c.poll(new Http3EventListener() {
-              public void onHeaders(long streamId, List<Http3Header> headers, boolean hasBody) {
-              }
+              public void onHeaders(long streamId, List<Http3Header> headers, boolean hasBody) {}
 
               public void onData(long streamId) {
                 final int bodyLength = h3c.recvBody(streamId, buf);
@@ -281,11 +280,10 @@ public class Http3Server {
                   res = handleHL7Message(encodedMessage);
                 }
 
-                handleData(current, streamId, res);
+                handleData(current, streamId, res); // Closes the connection
               }
 
-              public void onFinished(long streamId) {
-              }
+              public void onFinished(long streamId) {}
             });
 
             if (streamId < 0 && streamId != Quiche.ErrorCode.DONE) {
