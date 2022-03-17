@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import ca.uhn.hl7v2.DefaultHapiContext;
 import ca.uhn.hl7v2.HapiContext;
@@ -153,25 +154,7 @@ public class Http3Client {
               }
             }
 
-            public void onFinished(long streamId) {
-              List<Http3Header> req = new ArrayList<>();
-              req.add(new Http3Header(":method", "POST"));
-              req.add(new Http3Header(":scheme", uri.getScheme()));
-              req.add(new Http3Header(":authority", uri.getAuthority()));
-              req.add(new Http3Header(":path", uri.getPath()));
-              req.add(new Http3Header("user-agent", CLIENT_NAME));
-              req.add(new Http3Header("content-type", CONTENT_TYPE));
-              req.add(new Http3Header("content-length", Integer.toString(hl7_body.length)));
-
-              h3c.sendRequest(req, false);
-              streamId+=4;
-              System.out.println(streamId);
-              final long written = h3c.sendBody(streamId, hl7_body, false);
-              if (written < 0) {
-                System.out.println("! h3 send body 2 failed " + written);
-                return;
-              }
-            }
+            public void onFinished(long streamId) {}
           });
 
           if (streamId < 0 && streamId != Quiche.ErrorCode.DONE) {
@@ -204,12 +187,22 @@ public class Http3Client {
         req.add(new Http3Header("content-length", Integer.toString(hl7_body.length)));
 
         streamId = h3Conn.sendRequest(req, false);
-        final long written = h3Conn.sendBody(streamId, hl7_body, false);
+        final long written = h3Conn.sendBody(streamId, hl7_body, true);
         if (written < 0) {
           System.out.println("! h3 send body failed " + written);
           return;
         }
-       
+        
+        Long stmId = streamId + 4;
+        for (int i = 2; i < 11; i++, stmId+=4) {
+          System.out.println(stmId);
+          h3Conn.sendRequest(req, false);
+          final long written2 = h3Conn.sendBody(stmId, hl7_body, true);
+          if (written2 < 0) {
+            System.out.println("! h3 send body 2 failed " + written2);
+            return;
+          }
+        }
       }
 
       // WRITING LOOP
