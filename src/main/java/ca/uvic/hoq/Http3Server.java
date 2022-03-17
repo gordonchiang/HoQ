@@ -362,7 +362,6 @@ public class Http3Server {
   }
 
   public final static void handleData(Client client, Long streamId, String res) {
-    System.out.println(streamId);
     final Connection conn = client.connection();
     final Http3Connection h3Conn = client.http3Connection();
 
@@ -385,7 +384,7 @@ public class Http3Server {
     }
 
     if (sent < 0) {
-      System.out.println("! h3.send response failed1 " + sent);
+      System.out.println("! h3.send response failed " + sent);
       return;
     }
 
@@ -426,7 +425,7 @@ public class Http3Server {
       if (sent == Http3.ErrorCode.STREAM_BLOCKED)
         return;
       if (sent < 0) {
-        System.out.println("! h3.send response failed2 " + sent);
+        System.out.println("! h3.send response failed " + sent);
         return;
       }
     }

@@ -143,6 +143,13 @@ public class Http3Client {
               } else {
                 final byte[] body = Arrays.copyOfRange(buffer, 0, bodyLength);
                 System.out.println("Response: " + new String(body, StandardCharsets.UTF_8));
+                
+                if (streamId + 4 >= 395) {
+                  // Close connection immediately after receiving ACK to HL7 message
+                  conn.close(true, 0x00, "kthxbye");
+                  reading.set(false);
+                  return;
+                }
               }
             }
 
