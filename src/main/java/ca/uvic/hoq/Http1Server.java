@@ -14,6 +14,7 @@ import ca.uhn.hl7v2.hoh.llp.Hl7OverHttpLowerLayerProtocol;
 import ca.uhn.hl7v2.hoh.util.ServerRoleEnum;
 import ca.uhn.hl7v2.app.SimpleServer;
 import ca.uhn.hl7v2.app.HL7Service;
+
 import ca.uvic.hoq.MyApplication;
 
 import io.quiche4j.Utils;
@@ -25,7 +26,7 @@ public class Http1Server {
   public static void main(String[] args) throws Exception {
     // Parse arguments
     if (2 != args.length) {
-      System.out.println("Usage: ./http1.sh -s -t -u 8888");
+      System.out.println("Usage: ./run.sh -s -u 8888 -v 1 -t");
       System.exit(1);
     }
     

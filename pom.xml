@@ -33,13 +33,6 @@
 							<goal>single</goal>
 						</goals>
 						<configuration>
-							<!--
-							<archive>
-								<manifest>
-									<mainClass>ca.uvic.hoq.App</mainClass>
-								</manifest>
-							</archive>
-							-->
 							<descriptorRefs>
 								<descriptorRef>jar-with-dependencies</descriptorRef>
 							</descriptorRefs>

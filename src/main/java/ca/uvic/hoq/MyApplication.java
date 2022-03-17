@@ -20,7 +20,7 @@ public class MyApplication implements ReceivingApplication {
    */
   public Message processMessage(Message theMessage, Map theMetadata)
       throws ReceivingApplicationException, HL7Exception {
-    System.out.println("Received message: " + theMessage.encode());
+    System.out.println("Received HL7 message: " + theMessage.encode());
 
     // .. process the message ..
 
@@ -30,6 +30,7 @@ public class MyApplication implements ReceivingApplication {
     Message response;
     try {
       response = theMessage.generateACK();
+      System.out.println("Response: " + response);
     } catch (IOException e) {
       throw new ReceivingApplicationException(e);
     }

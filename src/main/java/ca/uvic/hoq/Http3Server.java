@@ -36,7 +36,9 @@ import ca.uhn.hl7v2.HapiContext;
 import ca.uhn.hl7v2.model.Message;
 import ca.uhn.hl7v2.parser.Parser;
 import ca.uhn.hl7v2.protocol.ReceivingApplication;
+
 import ca.uvic.hoq.MyApplication;
+import ca.uvic.hoq.Helpers;
 
 public class Http3Server {
 
@@ -100,7 +102,7 @@ public class Http3Server {
   public static void main(String[] args) throws IOException {
     // Parse arguments
     if (1 != args.length) {
-      System.out.println("Usage: ./http3.sh -s -u https://localhost:8888");
+      System.out.println("Usage: ./run.sh -s -u https://localhost:8888 -v 3");
       System.exit(1);
     }
 

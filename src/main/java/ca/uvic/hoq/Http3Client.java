@@ -39,6 +39,8 @@ import ca.uhn.hl7v2.model.v24.segment.MSH;
 import ca.uhn.hl7v2.model.v24.segment.PID;
 import ca.uhn.hl7v2.parser.Parser;
 
+import ca.uvic.hoq.Helpers;
+
 public class Http3Client {
 
   public static final int MAX_DATAGRAM_SIZE = 2048;
@@ -48,7 +50,7 @@ public class Http3Client {
   public static void main(String[] args) throws UnknownHostException, IOException {
     // Parse arguments
     if (1 != args.length) {
-      System.out.println("Usage: ./http3.sh -c -u https://localhost:8888");
+      System.out.println("Usage: ./run.sh -c -u https://localhost:8888 -v 3");
       System.exit(1);
     }
 
@@ -68,7 +70,7 @@ public class Http3Client {
       return;
     }
     
-    final byte[] hl7_body = HL7MessageGenerator().getBytes();
+    final byte[] hl7_body = Helpers.encodeMessage(Helpers.generateADTA01Message()).getBytes();
 
     final Config config = new ConfigBuilder(Quiche.PROTOCOL_VERSION)
         .withApplicationProtos(Http3.APPLICATION_PROTOCOL)
@@ -214,42 +216,6 @@ public class Http3Client {
     }
 
     socket.close();
-  }
-
-  public final static String HL7MessageGenerator() {
-    String encodedMessage = null;
-
-    try {
-      ADT_A01 adt = new ADT_A01();
-      adt.initQuickstart("ADT", "A01", "P");
-
-      // Populate the MSH Segment
-      MSH mshSegment = adt.getMSH();
-      mshSegment.getSendingApplication().getNamespaceID().setValue("TestSendingSystem");
-      mshSegment.getSequenceNumber().setValue("123");
-
-      // Populate the PID Segment
-      PID pid = adt.getPID();
-      pid.getPatientName(0).getFamilyName().getSurname().setValue("Doe");
-      pid.getPatientName(0).getGivenName().setValue("John");
-      pid.getPatientIdentifierList(0).getID().setValue("123456");
-
-      /*
-       * In a real situation, of course, many more segments and fields would be
-       * populated
-       */
-
-      // Encode the message
-      HapiContext context = new DefaultHapiContext();
-      Parser parser = context.getPipeParser();
-      encodedMessage = parser.encode(adt);
-      System.out.println("HL7 message: " + encodedMessage);
-    } catch (Exception e) {
-      System.out.println("Error generating HL7 message: " + e);
-      System.exit(1);
-    }
-
-    return encodedMessage;
   }
 
 }
