@@ -25,6 +25,7 @@ public class Http1Client {
 
   private final static HapiContext context = new DefaultHapiContext();
   private final static Parser parser = context.getPipeParser();
+  private static int countResponses = 0;
 
   public static void main(String[] args) throws Exception {
     // Parse arguments
@@ -53,6 +54,7 @@ public class Http1Client {
     Helpers.encodeMessage(adt);
 
     HohClientSimple client = new HohClientSimple(host, port, "/", parser);
+    client.setAutoClose(false);
 
     if (enableTLS) {
       // Assign a socket factory which references the keystore
@@ -66,11 +68,22 @@ public class Http1Client {
     ISendable sendable = new MessageSendable(adt);
 
     // sendAndReceive actually sends the message
-    IReceivable<Message> receivable = client.sendAndReceiveMessage(sendable);
-
-    // receivable.getRawMessage() provides the response
-    Message message = receivable.getMessage();
-    System.out.println("Response: " + message.encode());
+    IReceivable<Message> receivable = null;
+    Message message = null;
+    for (int i = 0; i < 10; i++) {
+      receivable = client.sendAndReceiveMessage(sendable);
+    }
+    
+    while(countResponses < 10) {
+      // receivable.getRawMessage() provides the response
+      message = receivable.getMessage();
+      System.out.println("Response: " + message.encode());
+      
+      countResponses++;
+    }
+    
+    client.close();
+    
   }
 
 }
