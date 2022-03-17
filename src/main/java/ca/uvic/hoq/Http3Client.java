@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import ca.uhn.hl7v2.DefaultHapiContext;
 import ca.uhn.hl7v2.HapiContext;
@@ -48,6 +48,8 @@ public class Http3Client {
 
   public static final String CLIENT_NAME = "Quiche4j";
   public static final String CONTENT_TYPE = "application/hl7-v2; charset=UTF-8";
+  
+  public static AtomicInteger countResponses = new AtomicInteger();
 
   public static void main(String[] args) throws UnknownHostException, IOException {
     // Parse arguments
@@ -144,17 +146,17 @@ public class Http3Client {
               } else {
                 final byte[] body = Arrays.copyOfRange(buffer, 0, bodyLength);
                 System.out.println("Response: " + new String(body, StandardCharsets.UTF_8));
-                
-                if (streamId + 4 >= 395) {
-                  // Close connection immediately after receiving ACK to HL7 message
-                  conn.close(true, 0x00, "kthxbye");
-                  reading.set(false);
-                  return;
-                }
               }
             }
 
-            public void onFinished(long streamId) {}
+            public void onFinished(long streamId) {
+              countResponses.addAndGet(1);
+              if (countResponses.get() == 10) {
+                // Close connection after 10 responses
+                conn.close(true, 0x00, "kthxbye");
+                reading.set(false);
+              }
+            }
           });
 
           if (streamId < 0 && streamId != Quiche.ErrorCode.DONE) {
@@ -187,7 +189,7 @@ public class Http3Client {
         req.add(new Http3Header("content-length", Integer.toString(hl7_body.length)));
 
         streamId = h3Conn.sendRequest(req, false);
-        final long written = h3Conn.sendBody(streamId, hl7_body, true);
+        long written = h3Conn.sendBody(streamId, hl7_body, true);
         if (written < 0) {
           System.out.println("! h3 send body failed " + written);
           return;
@@ -195,11 +197,10 @@ public class Http3Client {
         
         Long stmId = streamId + 4;
         for (int i = 2; i < 11; i++, stmId+=4) {
-          System.out.println(stmId);
           h3Conn.sendRequest(req, false);
-          final long written2 = h3Conn.sendBody(stmId, hl7_body, true);
-          if (written2 < 0) {
-            System.out.println("! h3 send body 2 failed " + written2);
+          written = h3Conn.sendBody(stmId, hl7_body, true);
+          if (written < 0) {
+            System.out.println("! h3 send body 2 failed " + written);
             return;
           }
         }

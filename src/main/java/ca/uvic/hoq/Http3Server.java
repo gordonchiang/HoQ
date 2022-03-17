@@ -364,6 +364,9 @@ public class Http3Server {
   public final static void handleData(Client client, Long streamId, String res) {
     final Connection conn = client.connection();
     final Http3Connection h3Conn = client.http3Connection();
+    
+    // SHUTDOWN STREAM
+    conn.streamShutdown(streamId, Quiche.Shutdown.READ, 0L);
 
     final byte[] body = res.getBytes();
     final List<Http3Header> headers = new ArrayList<>();
