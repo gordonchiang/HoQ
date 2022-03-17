@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 
 print_usage() {
-  printf "Usage:\nHTTP/1.1 Server: ./run.sh -s -u https://localhost:8888 -v 1 -t\nHTTP/1.1 Client: ./run.sh -c -u https://localhost:8888 -v 1 -t\nQUIC Server: ./run.sh -s -u https://localhost:8888 -v 3\nQUIC Client: ./run.sh -c -u https://localhost:8888 -v 3\n-t optional for HTTP/1.1+TLS\n"
+  printf "Usage:
+  HTTP/1.1 Server: ./run.sh -s -u 8888 -v 1 -t
+  HTTP/1.1 Client: ./run.sh -c -u https://localhost:8888 -v 1 -t
+  QUIC Server: ./run.sh -s -u https://localhost:8888 -v 3
+  QUIC Client: ./run.sh -c -u https://localhost:8888 -v 3
+  -t optional for HTTP/1.1+TLS\n"
 }
 
 if [ $# -eq 0 ];
@@ -34,6 +39,4 @@ if [ $VERSION -eq "1" ];
       -cp target/hoq-0.0.1-SNAPSHOT-jar-with-dependencies.jar \
       ca.uvic.hoq.Http${VERSION}${MODE} $URL;
 fi
-
-
 
