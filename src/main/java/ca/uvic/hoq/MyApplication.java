@@ -6,11 +6,18 @@ import java.util.Map;
 import ca.uhn.hl7v2.DefaultHapiContext;
 import ca.uhn.hl7v2.HL7Exception;
 import ca.uhn.hl7v2.HapiContext;
+import ca.uhn.hl7v2.parser.PipeParser;
+import ca.uhn.hl7v2.validation.ValidationContext;
+import ca.uhn.hl7v2.validation.impl.ValidationContextFactory;
 import ca.uhn.hl7v2.model.Message;
 import ca.uhn.hl7v2.protocol.ReceivingApplication;
 import ca.uhn.hl7v2.protocol.ReceivingApplicationException;
 
 public class MyApplication implements ReceivingApplication {
+
+  private static final HapiContext context = new DefaultHapiContext();
+  private static final PipeParser parser = context.getPipeParser();
+
   /**
    * processMessage is fired each time a new message arrives.
    * 
@@ -22,41 +29,35 @@ public class MyApplication implements ReceivingApplication {
       throws ReceivingApplicationException, HL7Exception {
     System.out.println("Received HL7 message: " + theMessage.encode());
 
-    // .. process the message ..
+    boolean somethingFailed = false;
 
-    /*
-     * Now reply to the message
-     */
+    // Process the message (validate the message)
+    context.setValidationContext((ValidationContext) ValidationContextFactory.defaultValidation());
+    try {
+      String msg = parser.encode(theMessage);
+      parser.parse(msg);
+    } catch (HL7Exception e) {
+      somethingFailed = true;
+    }
+
+    // Generate response
     Message response;
     try {
       response = theMessage.generateACK();
-      System.out.println("Response: " + response);
     } catch (IOException e) {
       throw new ReceivingApplicationException(e);
     }
 
-    /*
-     * If something goes horribly wrong, you can throw an exception and an HTTP 500
-     * error will be generated. However, it is preferable to return a normal HL7 ACK
-     * message with an "AE" response code to note an error.
-     */
-    boolean somethingFailed = false;
-    if (somethingFailed) {
-      throw new ReceivingApplicationException("");
-    }
-
-    /*
-     * It is better to return an HL7 message with an AE response code. This will
-     * still be returned by the transport with an HTTP 500 status code, but an HL7
-     * message will still be propagated up.
-     */
+    // Respond with AE response code and HTTP 500 status code
     if (somethingFailed) {
       try {
-        response = theMessage.generateACK("AE", new HL7Exception("There was a problem!!"));
+        response = theMessage.generateACK("AE", new HL7Exception("There was a problem!"));
       } catch (IOException e) {
         throw new ReceivingApplicationException(e);
       }
     }
+
+    System.out.println("Response: " + response);
 
     return response;
   }

@@ -35,6 +35,7 @@ import ca.uhn.hl7v2.HL7Exception;
 import ca.uhn.hl7v2.HapiContext;
 import ca.uhn.hl7v2.model.Message;
 import ca.uhn.hl7v2.parser.Parser;
+import ca.uhn.hl7v2.parser.PipeParser;
 import ca.uhn.hl7v2.protocol.ReceivingApplication;
 
 import ca.uvic.hoq.MyApplication;
@@ -96,7 +97,7 @@ public class Http3Server {
   private static final String HEADER_NAME_CONTENT_LENGTH = "content-length";
 
   private static final HapiContext context = new DefaultHapiContext();
-  private static final Parser parser = context.getPipeParser();
+  private static final Parser parser = PipeParser.getInstanceWithNoValidation();
   private static final ReceivingApplication myApplication = new MyApplication();
 
   public static void main(String[] args) throws IOException {
