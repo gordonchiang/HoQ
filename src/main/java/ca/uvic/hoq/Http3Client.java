@@ -143,14 +143,28 @@ public class Http3Client {
               } else {
                 final byte[] body = Arrays.copyOfRange(buffer, 0, bodyLength);
                 System.out.println("Response: " + new String(body, StandardCharsets.UTF_8));
-
-                // Close connection immediately after receiving ACK to HL7 message
-                conn.close(true, 0x00, "kthxbye");
-                reading.set(false);
               }
             }
 
-            public void onFinished(long streamId) {}
+            public void onFinished(long streamId) {
+              List<Http3Header> req = new ArrayList<>();
+              req.add(new Http3Header(":method", "POST"));
+              req.add(new Http3Header(":scheme", uri.getScheme()));
+              req.add(new Http3Header(":authority", uri.getAuthority()));
+              req.add(new Http3Header(":path", uri.getPath()));
+              req.add(new Http3Header("user-agent", CLIENT_NAME));
+              req.add(new Http3Header("content-type", CONTENT_TYPE));
+              req.add(new Http3Header("content-length", Integer.toString(hl7_body.length)));
+
+              h3c.sendRequest(req, false);
+              streamId+=4;
+              System.out.println(streamId);
+              final long written = h3c.sendBody(streamId, hl7_body, false);
+              if (written < 0) {
+                System.out.println("! h3 send body 2 failed " + written);
+                return;
+              }
+            }
           });
 
           if (streamId < 0 && streamId != Quiche.ErrorCode.DONE) {
@@ -183,11 +197,12 @@ public class Http3Client {
         req.add(new Http3Header("content-length", Integer.toString(hl7_body.length)));
 
         streamId = h3Conn.sendRequest(req, false);
-        final long written = h3Conn.sendBody(streamId, hl7_body, true);
+        final long written = h3Conn.sendBody(streamId, hl7_body, false);
         if (written < 0) {
           System.out.println("! h3 send body failed " + written);
           return;
         }
+       
       }
 
       // WRITING LOOP

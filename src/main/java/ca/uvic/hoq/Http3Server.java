@@ -95,6 +95,7 @@ public class Http3Server {
   private static final String HEADER_NAME_STATUS = ":status";
   private static final String HEADER_NAME_SERVER = "server";
   private static final String HEADER_NAME_CONTENT_LENGTH = "content-length";
+  private static final String CONTENT_TYPE = "application/hl7-v2; charset=UTF-8";
 
   private static final HapiContext context = new DefaultHapiContext();
   private static final Parser parser = PipeParser.getInstanceWithNoValidation();
@@ -280,7 +281,7 @@ public class Http3Server {
                   res = handleHL7Message(encodedMessage);
                 }
 
-                handleData(current, streamId, res); // Closes the connection
+                handleData(current, streamId, res);
               }
 
               public void onFinished(long streamId) {}
@@ -361,16 +362,15 @@ public class Http3Server {
   }
 
   public final static void handleData(Client client, Long streamId, String res) {
+    System.out.println(streamId);
     final Connection conn = client.connection();
     final Http3Connection h3Conn = client.http3Connection();
-
-    // SHUTDOWN STREAM
-    conn.streamShutdown(streamId, Quiche.Shutdown.READ, 0L);
 
     final byte[] body = res.getBytes();
     final List<Http3Header> headers = new ArrayList<>();
     headers.add(new Http3Header(HEADER_NAME_STATUS, "200"));
     headers.add(new Http3Header(HEADER_NAME_SERVER, SERVER_NAME));
+    headers.add(new Http3Header("content-type", CONTENT_TYPE));
     headers.add(new Http3Header(HEADER_NAME_CONTENT_LENGTH, Integer.toString(body.length)));
 
     final long sent = h3Conn.sendResponse(streamId, headers, false);
@@ -385,7 +385,7 @@ public class Http3Server {
     }
 
     if (sent < 0) {
-      System.out.println("! h3.send response failed " + sent);
+      System.out.println("! h3.send response failed1 " + sent);
       return;
     }
 
@@ -426,7 +426,7 @@ public class Http3Server {
       if (sent == Http3.ErrorCode.STREAM_BLOCKED)
         return;
       if (sent < 0) {
-        System.out.println("! h3.send response failed " + sent);
+        System.out.println("! h3.send response failed2 " + sent);
         return;
       }
     }
