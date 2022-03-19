@@ -188,19 +188,13 @@ public class Http3Client {
         req.add(new Http3Header("content-type", CONTENT_TYPE));
         req.add(new Http3Header("content-length", Integer.toString(hl7_body.length)));
 
-        streamId = h3Conn.sendRequest(req, false);
-        long written = h3Conn.sendBody(streamId, hl7_body, true);
-        if (written < 0) {
-          System.out.println("! h3 send body failed " + written);
-          return;
-        }
-        
-        Long stmId = streamId + 4;
-        for (int i = 2; i < 11; i++, stmId+=4) {
+        long written;
+        streamId = (long) 0; // First request sets streamId to 0
+        for (int i = 0; i < 10; i++, streamId += 4) {
           h3Conn.sendRequest(req, false);
-          written = h3Conn.sendBody(stmId, hl7_body, true);
+          written = h3Conn.sendBody(streamId, hl7_body, true);
           if (written < 0) {
-            System.out.println("! h3 send body 2 failed " + written);
+            System.out.println("! h3 send body failed " + written);
             return;
           }
         }
