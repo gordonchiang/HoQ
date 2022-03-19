@@ -153,7 +153,7 @@ public class Http3Client {
               countResponses.addAndGet(1);
               if (countResponses.get() == 10) {
                 // Close connection after 10 responses
-                conn.close(true, 0x00, "kthxbye");
+                conn.close(false, 0x00, "kthxbye");
                 reading.set(false);
               }
             }
