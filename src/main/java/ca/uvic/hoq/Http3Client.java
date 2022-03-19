@@ -81,7 +81,7 @@ public class Http3Client {
         .withVerifyPeer(false)
         .loadCertChainFromPemFile(Utils.copyFileFromJAR("certs", "/cert.crt"))
         .loadPrivKeyFromPemFile(Utils.copyFileFromJAR("certs", "/cert.key"))
-        .withMaxIdleTimeout(5_000)
+//        .withMaxIdleTimeout(5_000)
         .withMaxUdpPayloadSize(MAX_DATAGRAM_SIZE)
         .withInitialMaxData(10_000_000)
         .withInitialMaxStreamDataBidiLocal(1_000_000)

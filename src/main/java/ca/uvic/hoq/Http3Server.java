@@ -131,7 +131,7 @@ public class Http3Server {
         .withApplicationProtos(Http3.APPLICATION_PROTOCOL)
         .withVerifyPeer(false).loadCertChainFromPemFile(Utils.copyFileFromJAR("certs", "/cert.crt"))
         .loadPrivKeyFromPemFile(Utils.copyFileFromJAR("certs", "/cert.key"))
-        .withMaxIdleTimeout(5_000)
+//        .withMaxIdleTimeout(5_000)
         .withMaxUdpPayloadSize(MAX_DATAGRAM_SIZE)
         .withInitialMaxData(10_000_000)
         .withInitialMaxStreamDataBidiLocal(1_000_000)
