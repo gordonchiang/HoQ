@@ -12,7 +12,7 @@ HoQ was developed for Ubuntu 20.04 LTS using OpenJDK 11. Other distributions and
 2. Clone HoQ and build: `mvn install`
 3. Use `./run.sh` to see how to run the clients and servers
 
-## Mininet testing
+## Mininet Testing
 
 WIP
 
