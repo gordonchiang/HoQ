@@ -29,12 +29,9 @@ h4 ./run.sh -s -u https://10.0.0.4:8888 -v 1 &
 h3 ./run.sh -c -u https://10.0.0.4:8888 -v 1 -t
 
 h4 ./run.sh -s -u https://10.0.0.4:8888 -v 1 -t &
-<<<<<<< HEAD
-=======
 
 ## Troubleshooting
 
 If you run into build errors for quiche4j, try to switch the quiche4j directory to use the nightly toolchain of cargo: `rustup override set nightly`
 
 If you see `WARNING: An illegal reflective access operation has occurred`, [try the solution here](https://stackoverflow.com/a/63876216).
->>>>>>> main
