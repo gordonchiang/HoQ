@@ -14,7 +14,13 @@ HoQ was developed for Ubuntu 20.04 LTS using OpenJDK 11. Other distributions and
 
 ## Mininet Testing
 
-WIP
+sudo apt-get install mininet
+
+git clone git@github.com:mininet/mininet.git
+
+mininet/util/install.sh -fw
+
+sudo mn -c
 
 sudo mn --topo single,4  --link tc,bw=10,delay=100ms,loss=1
 
