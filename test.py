@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 
+import getopt
 from sys import argv
 from time import sleep, localtime
 
@@ -9,6 +10,9 @@ from mininet.topo import Topo
 from mininet.link import TCLink
 from mininet.util import dumpNodeConnections
 from mininet.log import setLogLevel, info
+
+http_version = None
+tls = ''
 
 class TestTopo(Topo):
   def build(self, n=2): # Default: 2 hosts connected to 1 switch: h1--s1--h2
@@ -39,10 +43,10 @@ def main():
   sleep(10)
 
   info('Starting server\n')
-  h2.cmd('./run.sh -s -u https://{}:8888 -v 3 &'.format(h2.IP()))
+  h2.cmd('./run.sh -s -u https://{}:8888 -v {} {} &'.format(h2.IP(), http_version, tls))
 
   info('Starting client\n')
-  print(h1.cmd('./run.sh -c -u https://{}:8888 -v 3'.format(h2.IP())))
+  print(h1.cmd('./run.sh -c -u https://{}:8888 -v {} {}'.format(h2.IP(), http_version, tls)))
 
   sleep(10)
 
@@ -52,4 +56,24 @@ def main():
 
 if __name__ == '__main__':
   setLogLevel('info')
+
+  try:
+    # Parse options
+    arguments, values = getopt.getopt(argv[1:], "tv:")
+    
+    # Check arguments
+    for currentArgument, currentValue in arguments:
+      if currentArgument in ('-v'):
+        http_version = currentValue
+
+      elif currentArgument in ('-t'):
+        tls = '-t'
+
+    if not http_version:
+      exit()
+
+  except getopt.error as err:
+    # Error parsing command line arguments
+    print (str(err))
+
   main()
