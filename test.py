@@ -10,7 +10,7 @@ from mininet.util import dumpNodeConnections
 from mininet.log import setLogLevel, info
 
 class TestTopo(Topo):
-  def build( self, n=2 ): # Default: 2 hosts connected to 1 switch: h1--s1--h2
+  def build(self, n=2): # Default: 2 hosts connected to 1 switch: h1--s1--h2
       switch = self.addSwitch('s1')
       for h in range(n):
         # Add host
