@@ -11,12 +11,21 @@ from mininet.link import TCLink
 from mininet.util import dumpNodeConnections
 from mininet.log import setLogLevel, info
 
-http_version = None
-tls = ''
+http_version = 1 # 1 or 3
+tls = '' # '-t' or empty string
 bandwidth = 10 # Mbps
 delay = '0ms' # ms
 loss = 0 # %
 iterations = 1
+
+def printUsage():
+  print('''Example: sudo ./test.sh -v 1 -t -b 10 -d 100ms -l 1 -i 10
+-v to choose HTTP version (1 or 3) (defualt is 1)
+-t to enable TLS on HTTP/1.1 (default is disabled)
+-b to select bandwidth of links (default is 10 Mbps)
+-d to select delay of links (default is 0ms)
+-l to select loss at links (default is 0%)
+-i to select the number of test iterations to run (default is 1)''')
 
 class TestTopo(Topo):
   def build(self, n=2): # Default: 2 hosts connected to 1 switch: h1--s1--h2
@@ -68,6 +77,10 @@ def main():
 if __name__ == '__main__':
   setLogLevel('info')
 
+  if len(argv) <= 1:
+    printUsage()
+    exit(1)
+
   try:
     # Parse options
     arguments, values = getopt.getopt(argv[1:], "tv:b:d:l:i:")
@@ -92,11 +105,10 @@ if __name__ == '__main__':
       elif currentArgument in ('-i'):
         iterations = int(currentValue)
 
-    if not http_version:
-      exit()
-
   except getopt.error as err:
     # Error parsing command line arguments
-    print (str(err))
+    print(str(err))
+    printUsage()
+    exit(1)
 
   main()
