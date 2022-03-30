@@ -71,6 +71,9 @@ public class Http1Client {
     // receivable.getRawMessage() provides the response
     Message message = receivable.getMessage();
     System.out.println("Response: " + message.encode());
+    
+    client.close();
+
   }
 
 }
