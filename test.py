@@ -34,7 +34,7 @@ class TestTopo(Topo):
       # Add hosts
       host = self.addHost('h%s' % (h + 1))
 
-      # 10 Mbps, 5ms delay, no packet loss
+      # Create links with selected bandwidth, delay, and loss (Default is 10 Mbps, 0ms delay, 0% loss)
       self.addLink(host, switch, bw=bandwidth, delay=delay, loss=loss)
 
 def main():
