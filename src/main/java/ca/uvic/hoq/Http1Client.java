@@ -83,7 +83,7 @@ public class Http1Client {
     }
     
     client.close();
-    
+
   }
 
 }
