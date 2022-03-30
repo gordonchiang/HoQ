@@ -13,6 +13,10 @@ from mininet.log import setLogLevel, info
 
 http_version = None
 tls = ''
+bandwidth = 10 # Mbps
+delay = '0ms' # ms
+loss = 0 # %
+iterations = 1
 
 class TestTopo(Topo):
   def build(self, n=2): # Default: 2 hosts connected to 1 switch: h1--s1--h2
@@ -22,7 +26,7 @@ class TestTopo(Topo):
       host = self.addHost('h%s' % (h + 1))
 
       # 10 Mbps, 5ms delay, no packet loss
-      self.addLink(host, switch, bw=10, delay='5ms', loss=0)
+      self.addLink(host, switch, bw=bandwidth, delay=delay, loss=loss)
 
 def main():
   topo = TestTopo() 
@@ -35,22 +39,29 @@ def main():
 
   h1, h2, s1  = net.hosts[0], net.hosts[1], net.switches[0]
 
-  now = localtime()
-  filename = '{}{}{}{}{}{}_s1_dump.pcap'.format(now[0], now[1], now[2], now[3], now[4], now[5])
-  info('Recording packets: {}\n'.format(filename))
-  s1_pcap = s1.popen(['wireshark', '-i', 's1-eth1', '-i', 's1-eth2', '-f', 'port 8888', '-k', '-w', './dumps/{}'.format(filename)]) # TODO: -f doesn't seem to work
+  info('\n')
+  for i in range(iterations):
+    info('----- Starting iteration {} -----\n'.format(i+1))
 
-  sleep(10)
+    now = localtime()
+    filename = '{}{}{}{}{}{}_s1_dump.pcap'.format(now[0], now[1], now[2], now[3], now[4], now[5])
+    info('Recording packets: {}\n'.format(filename))
+    s1_pcap = s1.popen(['wireshark', '-i', 's1-eth1', '-i', 's1-eth2', '-f', 'port 8888', '-k', '-w', './dumps/{}'.format(filename)]) # TODO: -f doesn't seem to work
 
-  info('Starting server\n')
-  h2.cmd('./run.sh -s -u https://{}:8888 -v {} {} &'.format(h2.IP(), http_version, tls))
+    sleep(10)
 
-  info('Starting client\n')
-  print(h1.cmd('./run.sh -c -u https://{}:8888 -v {} {}'.format(h2.IP(), http_version, tls)))
+    info('Starting server\n')
+    h2.cmd('./run.sh -s -u https://{}:8888 -v {} {} &'.format(h2.IP(), http_version, tls))
 
-  sleep(10)
+    info('Starting client\n')
+    print(h1.cmd('./run.sh -c -u https://{}:8888 -v {} {}'.format(h2.IP(), http_version, tls)))
 
-  s1_pcap.terminate()
+    sleep(10)
+
+    s1_pcap.terminate()
+
+    info('----- End of iteration {} -----\n'.format(i+1))
+  info('\n')
 
   net.stop()
 
@@ -59,7 +70,7 @@ if __name__ == '__main__':
 
   try:
     # Parse options
-    arguments, values = getopt.getopt(argv[1:], "tv:")
+    arguments, values = getopt.getopt(argv[1:], "tv:b:d:l:i:")
     
     # Check arguments
     for currentArgument, currentValue in arguments:
@@ -68,6 +79,18 @@ if __name__ == '__main__':
 
       elif currentArgument in ('-t'):
         tls = '-t'
+
+      elif currentArgument in ('-b'):
+        bandwidth = int(currentValue)
+      
+      elif currentArgument in ('-d'):
+        delay = currentValue
+
+      elif currentArgument in ('-l'):
+        loss = int(currentValue)
+
+      elif currentArgument in ('-i'):
+        iterations = int(currentValue)
 
     if not http_version:
       exit()
