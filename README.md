@@ -10,7 +10,7 @@ HoQ was developed for Ubuntu 20.04 LTS using OpenJDK 11. Other distributions and
 
 1. Clone [a fork of quiche4j with minor fixes](https://github.com/gordonchiang/quiche4j/tree/feature-Enable_sending_body_with_request) and build
 2. Clone HoQ and build: `mvn install`
-3. Use `./run.sh` to see how to run the clients and servers
+3. Run `./run.sh` to see how to run the clients and servers
 
 ## Mininet Testing
 
@@ -21,7 +21,7 @@ HoQ was developed for Ubuntu 20.04 LTS using OpenJDK 11. Other distributions and
     git clone git@github.com:mininet/mininet.git
     mininet/util/install.sh -fw
     ```
-3. Use `sudo ./test.sh` to see how to run the test script
+3. Run `sudo ./test.sh` to see how to run the test script
 
 ## Troubleshooting
 
