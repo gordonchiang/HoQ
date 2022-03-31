@@ -45,18 +45,17 @@ class TestTopo(Topo):
 
 def main():
   topo = TestTopo() 
-  net = Mininet(topo=topo, link=TCLink, controller=Controller)
-
-  net.start()
-
-  info('Dumping host connections\n')
-  dumpNodeConnections(net.hosts)
-
-  h1, h2, s1  = net.hosts[0], net.hosts[1], net.switches[0]
-
-  info('\n')
+  
   for i in range(iterations):
-    info('----- Starting iteration {} -----\n'.format(i+1))
+    net = Mininet(topo=topo, link=TCLink, controller=Controller)
+    net.start()
+
+    info('Dumping host connections\n')
+    dumpNodeConnections(net.hosts)
+
+    h1, h2, s1  = net.hosts[0], net.hosts[1], net.switches[0]
+
+    info('\n----- Starting iteration {} -----\n'.format(i+1))
 
     now = localtime()
     filename = '{}{}{}{}{}{}_s1_dump.pcap'.format(now[0], now[1], now[2], now[3], now[4], now[5])
@@ -68,6 +67,8 @@ def main():
     info('Starting server\n')
     h2.cmd('./run.sh -s -u https://{}:8888 -v {} {} &'.format(h2.IP(), http_version, tls))
 
+    sleep(1)
+
     info('Starting client\n')
     print(h1.cmd('./run.sh -c -u https://{}:8888 -v {} {}'.format(h2.IP(), http_version, tls)))
 
@@ -75,10 +76,9 @@ def main():
 
     s1_pcap.terminate()
 
-    info('----- End of iteration {} -----\n'.format(i+1))
-  info('\n')
+    net.stop()
 
-  net.stop()
+    info('----- End of iteration {} -----\n\n'.format(i+1))
 
 if __name__ == '__main__':
   setLogLevel('info')
