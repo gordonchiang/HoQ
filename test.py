@@ -47,6 +47,8 @@ def main():
   topo = TestTopo() 
   
   for i in range(iterations):
+    info('\n----- Starting iteration {} -----\n'.format(i+1))
+
     net = Mininet(topo=topo, link=TCLink, controller=Controller)
     net.start()
 
@@ -54,8 +56,6 @@ def main():
     dumpNodeConnections(net.hosts)
 
     h1, h2, s1  = net.hosts[0], net.hosts[1], net.switches[0]
-
-    info('\n----- Starting iteration {} -----\n'.format(i+1))
 
     now = localtime()
     filename = '{}{}{}{}{}{}_s1_dump.pcap'.format(now[0], now[1], now[2], now[3], now[4], now[5])
