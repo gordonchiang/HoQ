@@ -28,14 +28,20 @@ def printUsage():
 -i to select the number of test iterations to run (default is 1)''')
 
 class TestTopo(Topo):
-  def build(self, n=2): # Default: 2 hosts connected to 1 switch: h1--s1--h2
+  def build(self, n=2): # 2 hosts connected to 1 switch: h1--s1--h2
     switch = self.addSwitch('s1')
     for h in range(n):
       # Add hosts
       host = self.addHost('h%s' % (h + 1))
 
-      # Create links with selected bandwidth, delay, and loss (Default is 10 Mbps, 0ms delay, 0% loss)
-      self.addLink(host, switch, bw=bandwidth, delay=delay, loss=loss)
+      # Create link from client to switch as bottleneck
+      # with selected bandwidth, delay, and loss (default is 10 Mbps, 0ms delay, 0% loss)
+      if h == 0:
+        self.addLink(host, switch, bw=bandwidth, delay=delay, loss=loss)
+
+      # From server to switch, assume direct ethernet connection (no bottleneck)
+      else:
+        self.addLink(host, switch, bw=1000, delay='0ms', loss=0)
 
 def main():
   topo = TestTopo() 
