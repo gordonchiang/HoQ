@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# After running the dump_*.sh scripts, this will iterate through all of the capture output and average the results
+# After running the dump_*.sh scripts, this will iterate through all of the capture output and calculate the results
 
 regex="^([[:digit:]]*\.[[:digit:]]*) ([[:digit:]]*\.[[:digit:]]*)"
 
-printf "Dump,AverageTime\n" >> output.csv
+printf "Dump,Iter1,Iter2,Iter3,AverageTime\n" >> output.csv
 
 for dir in ethernet wifi mobile
 do
@@ -36,16 +36,11 @@ do
             fi
         done
 
-#         for value in "${times[@]}"
-#         do
-#             echo $value
-#         done
-
         # get average of captures
         average=`awk '{printf "%.9f\n", ($1+$2+$3)/3}' <<< "${times[0]} ${times[1]} ${times[2]}"`
-        echo $average
 
-        printf '%s,%s\n' "$subdir" "$average" >> output.csv
+        printf '%s,%s,%s,%s\n' "${times[0]}" "${times[1]}" "${times[2]}" "$average"
+        printf '%s,%s,%s,%s,%s\n' "$subdir" "${times[0]}" "${times[1]}" "${times[2]}" "$average" >> output.csv
 
     done
 
