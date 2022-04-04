@@ -3,7 +3,7 @@
 git checkout main # use main branch aka 1 message
 mvn install
 
-params="-b 1000 -i 3" # 1000 Mbps, 3 iterations
+params="-b 1000 -i ${1:-3}" # 1000 Mbps, 3 iterations
 
 # Main branch, ethernet, no TLS
 sudo ./test.py -v 1 ${params}
@@ -49,6 +49,3 @@ sudo ./test.py -v 3 ${params}
 dir_name='mult_ethernet_quic'
 mkdir ./dumps/${dir_name}
 mv ./dumps/*.pcap ./dumps/${dir_name}
-
-git checkout main
-mvn install
