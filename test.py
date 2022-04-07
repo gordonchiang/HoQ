@@ -18,7 +18,7 @@ loss = 0 # %
 iterations = 1
 
 def printUsage():
-  print('''Example: sudo ./test.sh -v 1 -t -b 10 -d 100ms -l 1 -i 10
+  print('''Example: sudo ./test.py -v 1 -t -b 10 -d 100ms -l 1 -i 10
 -v to choose HTTP version (1 or 3) (defualt is 1)
 -t to enable TLS on HTTP/1.1 (default is disabled)
 -b to select bandwidth of links (default is 10 Mbps)
