@@ -26,7 +26,7 @@ dir_name='main_ethernet_quic'
 mkdir ./dumps/${dir_name}
 mv ./dumps/*.pcap ./dumps/${dir_name}
 
-git checkout gordonchiang/Send_multiple_requests # use branch for 10 messages in once
+git checkout gordonchiang/Send_multiple_requests # use branch for 10 messages at once
 mvn install
 
 # Mult branch, ethernet, no TLS
