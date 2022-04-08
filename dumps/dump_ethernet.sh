@@ -3,7 +3,7 @@
 git checkout main # use main branch aka 1 message
 mvn install
 
-params="-b 1000 -i ${1:-3}" # 1000 Mbps, 3 iterations
+params="-b 1000 -i ${1:-10}" # 1000 Mbps, 10 iterations
 
 # Main branch, ethernet, no TLS
 sudo ./test.py -v 1 ${params}
