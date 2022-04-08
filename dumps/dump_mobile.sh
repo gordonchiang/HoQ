@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-params="-b 10 -i ${1:-3}" # 10 Mbps, 3 iterations
+params="-b 10 -i ${1:-10}" # 10 Mbps, 10 iterations
 
 for loss in 1 3 5;
 do

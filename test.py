@@ -5,7 +5,6 @@ from sys import argv
 from time import sleep, localtime
 
 from mininet.net import Mininet
-from mininet.node import Controller
 from mininet.topo import Topo
 from mininet.link import TCLink
 from mininet.util import dumpNodeConnections
@@ -19,7 +18,7 @@ loss = 0 # %
 iterations = 1
 
 def printUsage():
-  print('''Example: sudo ./test.sh -v 1 -t -b 10 -d 100ms -l 1 -i 10
+  print('''Example: sudo ./test.py -v 1 -t -b 10 -d 100ms -l 1 -i 10
 -v to choose HTTP version (1 or 3) (defualt is 1)
 -t to enable TLS on HTTP/1.1 (default is disabled)
 -b to select bandwidth of links (default is 10 Mbps)
@@ -47,9 +46,9 @@ def main():
   topo = TestTopo() 
   
   for i in range(iterations):
-    info('\n----- Starting iteration {} -----\n'.format(i+1))
+    info('\n----- Starting iteration {}/{} -----\n'.format(i+1, iterations))
 
-    net = Mininet(topo=topo, link=TCLink, controller=Controller)
+    net = Mininet(topo=topo, link=TCLink, controller=None)
     net.start()
 
     info('Dumping host connections\n')
@@ -57,28 +56,32 @@ def main():
 
     h1, h2, s1  = net.hosts[0], net.hosts[1], net.switches[0]
 
-    now = localtime()
-    filename = '{}{}{}{}{}{}_s1_dump.pcap'.format(now[0], now[1], now[2], now[3], now[4], now[5])
-    info('Recording packets: {}\n'.format(filename))
-    s1_pcap = s1.popen(['wireshark', '-i', 's1-eth1', '-i', 's1-eth2', '-f', 'port 8888', '-k', '-w', './dumps/{}'.format(filename)]) # TODO: -f doesn't seem to work
+    info('Adding flows to switch')
+    print(s1.cmd('ovs-ofctl add-flow s1 in_port=1,nw_dst=10.0.0.2,actions=output:2'))
+    print(s1.cmd('ovs-ofctl add-flow s1 in_port=2,nw_dst=10.0.0.1,actions=output:1'))
 
-    sleep(10)
+    now = localtime()
+    filename = '{}{}{}{}{}{}_h1_dump.pcap'.format(now[0], now[1], now[2], now[3], now[4], now[5])
+    info('Recording packets: {}\n'.format(filename))
+    h1_pcap = h1.popen(['wireshark', '-i', 'h1-eth0','-f', 'port 8888', '-k', '-w', './dumps/{}'.format(filename)]) # TODO: -f doesn't seem to work
+
+    sleep(3)
 
     info('Starting server\n')
     h2.cmd('./run.sh -s -u https://{}:8888 -v {} {} &'.format(h2.IP(), http_version, tls))
 
-    sleep(1)
+    sleep(2)
 
     info('Starting client\n')
     print(h1.cmd('./run.sh -c -u https://{}:8888 -v {} {}'.format(h2.IP(), http_version, tls)))
 
-    sleep(10)
+    sleep(3)
 
-    s1_pcap.terminate()
+    h1_pcap.terminate()
 
     net.stop()
 
-    info('----- End of iteration {} -----\n\n'.format(i+1))
+    info('----- End of iteration {}/{} -----\n\n'.format(i+1, iterations))
 
 if __name__ == '__main__':
   setLogLevel('info')
