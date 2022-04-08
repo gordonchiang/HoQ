@@ -61,9 +61,9 @@ def main():
     print(s1.cmd('ovs-ofctl add-flow s1 in_port=2,nw_dst=10.0.0.1,actions=output:1'))
 
     now = localtime()
-    filename = '{}{}{}{}{}{}_s1_dump.pcap'.format(now[0], now[1], now[2], now[3], now[4], now[5])
+    filename = '{}{}{}{}{}{}_h1_dump.pcap'.format(now[0], now[1], now[2], now[3], now[4], now[5])
     info('Recording packets: {}\n'.format(filename))
-    s1_pcap = s1.popen(['wireshark', '-i', 's1-eth1', '-i', 's1-eth2', '-f', 'port 8888', '-k', '-w', './dumps/{}'.format(filename)]) # TODO: -f doesn't seem to work
+    h1_pcap = h1.popen(['wireshark', '-i', 'h1-eth0','-f', 'port 8888', '-k', '-w', './dumps/{}'.format(filename)]) # TODO: -f doesn't seem to work
 
     sleep(3)
 
@@ -77,7 +77,7 @@ def main():
 
     sleep(3)
 
-    s1_pcap.terminate()
+    h1_pcap.terminate()
 
     net.stop()
 
