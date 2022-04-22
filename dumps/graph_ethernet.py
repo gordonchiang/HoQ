@@ -24,13 +24,14 @@ for row in dataset.itertuples():
     if 'no_tls' in dump: index = 0
     elif 'quic' in dump: index = 2
     elif 'tls' in dump: index = 1
-    list[index] = (row[2], row[3], row[4])
-    list_avgs[index] = row[5]
+
+    list[index] = (row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11])
+    list_avgs[index] = row[12]
 
 print(main)
 print(mult)
 
-fig, axs = plt.subplots(2, 1)
+fig, axs = plt.subplots(2, 1, constrained_layout=True)
 
 bp1 = axs[0].boxplot(main)
 axs[0].set_title('Ethernet, Single Request')
@@ -42,8 +43,6 @@ axs[1].set_title('Ethernet, Batch Request')
 axs[1].set_xticklabels(['TCP', 'TCP+TLS', 'QUIC'])
 axs[1].set_ylabel('Duration (s)')
 
-fig.subplots_adjust(hspace=0.5)
-
 for i, line in enumerate(bp1['medians']):
     x, y = line.get_xydata()[1]
     text = ' μ={:.3f} '.format(main_avgs[i])
@@ -54,4 +53,5 @@ for i, line in enumerate(bp2['medians']):
     text = ' μ={:.3f} '.format(mult_avgs[i])
     axs[1].annotate(text, xy=(x, y))
 
+plt.savefig('ethernet.svg', format='svg')
 plt.show()
