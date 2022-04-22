@@ -110,11 +110,10 @@ for row in dataset.itertuples():
     elif '5%' in dump: loss_index = '5%'
     elif '1%' in dump: loss_index = '1%'
 
-    dict[protocol_index][delay_index][loss_index]['val'] = (row[2], row[3], row[4])
-    dict[protocol_index][delay_index][loss_index]['avg'] = row[5]
+    dict[protocol_index][delay_index][loss_index]['val'] = (row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11])
+    dict[protocol_index][delay_index][loss_index]['avg'] = row[12]
 
-fig, axs = plt.subplots(3, 3)
-fig.subplots_adjust(hspace=0.5, wspace=0.5)
+fig, axs = plt.subplots(6, 3, constrained_layout=True, figsize=(20,20))
 
 genPlot(axs, 0, 0, 'Single Request', '1ms', '1%')
 genPlot(axs, 0, 1, 'Single Request', '1ms', '5%')
@@ -125,18 +124,15 @@ genPlot(axs, 1, 2, 'Single Request', '5ms', '10%')
 genPlot(axs, 2, 0, 'Single Request', '10ms', '1%')
 genPlot(axs, 2, 1, 'Single Request', '10ms', '5%')
 genPlot(axs, 2, 2, 'Single Request', '10ms', '10%')
+genPlot(axs, 3, 0, 'Batch Request', '1ms', '1%')
+genPlot(axs, 3, 1, 'Batch Request', '1ms', '5%')
+genPlot(axs, 3, 2, 'Batch Request', '1ms', '10%')
+genPlot(axs, 4, 0, 'Batch Request', '5ms', '1%')
+genPlot(axs, 4, 1, 'Batch Request', '5ms', '5%')
+genPlot(axs, 4, 2, 'Batch Request', '5ms', '10%')
+genPlot(axs, 5, 0, 'Batch Request', '10ms', '1%')
+genPlot(axs, 5, 1, 'Batch Request', '10ms', '5%')
+genPlot(axs, 5, 2, 'Batch Request', '10ms', '10%')
 
-fig2, axs2 = plt.subplots(3, 3)
-fig2.subplots_adjust(hspace=0.5, wspace=0.5)
-
-genPlot(axs2, 0, 0, 'Batch Request', '1ms', '1%')
-genPlot(axs2, 0, 1, 'Batch Request', '1ms', '5%')
-genPlot(axs2, 0, 2, 'Batch Request', '1ms', '10%')
-genPlot(axs2, 1, 0, 'Batch Request', '5ms', '1%')
-genPlot(axs2, 1, 1, 'Batch Request', '5ms', '5%')
-genPlot(axs2, 1, 2, 'Batch Request', '5ms', '10%')
-genPlot(axs2, 2, 0, 'Batch Request', '10ms', '1%')
-genPlot(axs2, 2, 1, 'Batch Request', '10ms', '5%')
-genPlot(axs2, 2, 2, 'Batch Request', '10ms', '10%')
-
+plt.savefig('wifi.svg', format='svg')
 plt.show()
