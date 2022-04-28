@@ -10,7 +10,7 @@ A dataset and graphs can be found in the `data/` directory.
 
 HoQ was developed for Ubuntu 20.04 LTS using OpenJDK 11. Other distributions and Java versions have not been tested.
 
-1. Clone [a fork of quiche4j with minor fixes](https://github.com/gordonchiang/quiche4j/tree/feature-Enable_sending_body_with_request) and build
+1. Clone quiche4j and build
 2. Clone HoQ and build: `mvn install`
 3. Run `./run.sh` to see how to run the clients and servers
 
